@@ -1682,7 +1682,7 @@ pre .javascript .function {
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: #cdd271;
+  background: #8ee57f;
 }
 .links-of-blogroll {
   font-size: 13px;
@@ -2862,7 +2862,4 @@ a:hover {
 }
 .menu-item-active a:after {
   background-color: #87daff;
-}
-::selection {
-  background: #3bafda;
 }
