@@ -1,0 +1,794 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="HASH," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="哈希长度扩展攻击（Hash Length Extension Attacks）是一种常见的密码分析方法，在消息验证码（MAC）中应用很广，WEB类题目中也有出现，应队里WEB手要求，第一篇博客就先写这个吧。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="哈希长度扩展攻击总结">
+<meta property="og:url" content="https://danaive.github.io/2016/12/06/0x01/index.html">
+<meta property="og:site_name" content="NaiveBlue">
+<meta property="og:description" content="哈希长度扩展攻击（Hash Length Extension Attacks）是一种常见的密码分析方法，在消息验证码（MAC）中应用很广，WEB类题目中也有出现，应队里WEB手要求，第一篇博客就先写这个吧。">
+<meta property="og:updated_time" content="2016-12-09T14:28:34.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="哈希长度扩展攻击总结">
+<meta name="twitter:description" content="哈希长度扩展攻击（Hash Length Extension Attacks）是一种常见的密码分析方法，在消息验证码（MAC）中应用很广，WEB类题目中也有出现，应队里WEB手要求，第一篇博客就先写这个吧。">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"right","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://danaive.github.io/2016/12/06/0x01/"/>
+
+
+
+
+
+  <title> 哈希长度扩展攻击总结 | NaiveBlue </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-right page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">NaiveBlue</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">stay young stay simple</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+  <link itemprop="mainEntityOfPage" href="https://danaive.github.io/2016/12/06/0x01/">
+
+  <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <meta itemprop="name" content="danlei">
+    <meta itemprop="description" content="">
+    <meta itemprop="image" content="/images/avatar.jpg">
+  </span>
+
+  <span style="display:none" itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+    <meta itemprop="name" content="NaiveBlue">
+    <span style="display:none" itemprop="logo" itemscope itemtype="http://schema.org/ImageObject">
+      <img style="display:none;" itemprop="url image" alt="NaiveBlue" src="">
+    </span>
+  </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                哈希长度扩展攻击总结
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-12-06T14:58:36+08:00">
+                2016-12-06
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+              <span class="post-meta-divider">|</span>
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/CTF/" itemprop="url" rel="index">
+                    <span itemprop="name">CTF</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <a href="/2016/12/06/0x01/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2016/12/06/0x01/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>哈希长度扩展攻击（Hash Length Extension Attacks）是一种常见的密码分析方法，在消息验证码（MAC）中应用很广，WEB类题目中也有出现，应队里WEB手要求，第一篇博客就先写这个吧。<br><a id="more"></a></p>
+<h1 id="应用"><a href="#应用" class="headerlink" title="应用"></a>应用</h1><p>在基于<em>Merkle–Damgård</em>架构的哈希算法中，如果攻击者掌握了 Hash(message) 的值以及 message 的长度，那么在不知道 message 的情况下，可以获取<code>Hash( message || padding || message2 )</code>的值，其中 message2 为任意值，padding 通过哈希算法和 message 长度决定。md5/sha1/sha256 算法可被攻击，sha224虽然基于<em>Merkle–Damgård</em>架构，但不受影响，sha3族算法不基于<em>Merkle–Damgård</em>架构。</p>
+<h1 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h1><p><em>Merkle–Damgård</em> 架构如下图所示。</p>
+<p>其中 <em>IV</em> 表示初始向量，<em>f</em> 为压缩函数，<em>M</em> 为明文分块输入，<em>L</em> 为块数，<em>CV</em> 为链接向量。明文每512位为一块，最后的短块填充1位1和若干位0（按字节表示为\x80\x00\x00\x00…）直到最后一块中有448位（若短块不小于448位则新加一块，并填充至新块的448位），在剩下的64位中填上有效字节数，最高有效位在前。完整明文块和填充后的短块均为512位，和前一轮的链接向量（首轮则为初始向量）共同作为压缩函数的输入计算出本轮的链接向量。</p>
+<p>哈希函数的输出为当前明文填充后的链接变量，对于特定的哈希函数（即压缩函数 <em>f</em> 确定），可计算$CV_{i+1} = f(CV_i,\ M_i)$。掌握了 Hash(message) 就等同与掌握了将 message 分组、填充后所得到的最后一轮链接向量，那么任意选取 message2，则有：</p>
+<p>$Hash(message\ ||\ padding\ ||\ message2) = f(Hash(message),\ message2)$</p>
+<p>用 Hash(message) 值替换 Hash 函数的初始向量得到一个修改过的哈希函数 Hash’，则有：</p>
+<p>$Hash’(message2) = Hash(message\ ||\ padding\ ||\ message2)$</p>
+<p>前文提到 <em>sha224</em> 不受长度扩展攻击影响，是因为它的链接向量有32字节，而算法输出的哈希值为其中前28字节，链接向量未完全暴露。</p>
+<h1 id="实例"><a href="#实例" class="headerlink" title="实例"></a>实例</h1><h2 id="mtpox-PlaidCTF-2014"><a href="#mtpox-PlaidCTF-2014" class="headerlink" title="mtpox PlaidCTF 2014"></a>mtpox <em>PlaidCTF 2014</em></h2><figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div></pre></td><td class="code"><pre><div class="line"><span class="meta">&lt;?php</span></div><div class="line">  <span class="keyword">require_once</span>(<span class="string">"secrets.php"</span>);</div><div class="line">  $auth = <span class="keyword">false</span>;</div><div class="line">  <span class="keyword">if</span> (<span class="keyword">isset</span>($_COOKIE[<span class="string">"auth"</span>])) &#123;</div><div class="line">     $auth = unserialize($_COOKIE[<span class="string">"auth"</span>]);</div><div class="line">     $hsh = $_COOKIE[<span class="string">"hsh"</span>];</div><div class="line">     <span class="keyword">if</span> ($hsh !== hash(<span class="string">"sha256"</span>, $SECRET . strrev($_COOKIE[<span class="string">"auth"</span>]))) &#123;</div><div class="line">       $auth = <span class="keyword">false</span>;</div><div class="line">     &#125;</div><div class="line">  &#125;</div><div class="line">  <span class="keyword">else</span> &#123;</div><div class="line">    $auth = <span class="keyword">false</span>;</div><div class="line">    $s = serialize($auth);</div><div class="line">    setcookie(<span class="string">"auth"</span>, $s);</div><div class="line">    setcookie(<span class="string">"hsh"</span>, hash(<span class="string">"sha256"</span>, $SECRET . strrev($s)));</div><div class="line">  &#125;</div><div class="line">  <span class="keyword">if</span> ($auth) &#123;</div><div class="line">    <span class="keyword">if</span> (<span class="keyword">isset</span>($_GET[<span class="string">'query'</span>])) &#123;</div><div class="line">      $link = mysql_connect(<span class="string">'localhost'</span>, $SQL_USER, $SQL_PASSWORD) <span class="keyword">or</span> <span class="keyword">die</span>(<span class="string">'Could not connect: '</span> . mysql_error());</div><div class="line">      mysql_select_db($SQL_DATABASE) <span class="keyword">or</span> <span class="keyword">die</span>(<span class="string">'Could not select database'</span>);</div><div class="line">      $qstr = mysql_real_escape_string($_GET[<span class="string">'query'</span>]);</div><div class="line">      $query = <span class="string">"SELECT amount FROM plaidcoin_wallets WHERE id=$qstr"</span>;</div><div class="line">      $result = mysql_query($query) <span class="keyword">or</span> <span class="keyword">die</span>(<span class="string">'Query failed: '</span> . mysql_error());</div><div class="line">      $line = mysql_fetch_array($result, MYSQL_ASSOC);</div><div class="line">      <span class="keyword">foreach</span> ($line <span class="keyword">as</span> $col_value) &#123;</div><div class="line">        <span class="keyword">echo</span> <span class="string">"Wallet "</span> . $_GET[<span class="string">'query'</span>] . <span class="string">" contains "</span> . $col_value . <span class="string">" coins."</span>;</div><div class="line">      &#125;</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">       <span class="keyword">echo</span> <span class="string">"&lt;html&gt;&lt;head&gt;&lt;title&gt;MtPOX Admin Page&lt;/title&gt;&lt;/head&gt;&lt;body&gt;Welcome to the admin panel!&lt;br /&gt;&lt;br /&gt;&lt;form name='input' action='admin.php' method='get'&gt;Wallet ID: &lt;input type='text' name='query'&gt;&lt;input type='submit' value='Submit Query'&gt;&lt;/form&gt;&lt;/body&gt;&lt;/html&gt;"</span>;</div><div class="line">    &#125;</div><div class="line">  &#125;</div><div class="line">  <span class="keyword">else</span> <span class="keyword">echo</span> <span class="string">"Sorry, not authorized."</span>;</div><div class="line"><span class="meta">?&gt;</span></div></pre></td></tr></table></figure>
+<p>这个题是长度扩展攻击的入门题，不过代码中没有暴露私钥 SECRET 的长度，需要通过尝试来确定。</p>
+<p>代码逻辑非常直白，如果 cookie 里没有 auth 字段或者哈希验证不通过，服务器就把 false 的序化串 b:0; 放进 cookie 的 auth 字段，把 sha256( SECRET || strrev(‘b:0;’) ) 放进 cookie 的 hsh 字段。如果哈希验证通过，并且 auth 的反序化对象能被判断为真则进入下一步注入。</p>
+<p>sha256每块64字节，最后一块的最后8字节表明长度，若 SECRET 长度为 x ，那么填充内容为<code>&#39;\x80&#39; + &#39;\x00&#39;\*(51-x) + hex(x+4)</code>（这里的hex长度8字节，高位用\x00填充，auth 长度为4字节，\x80 占1字节，所以 \x00 字节共51-x个），在下一块的内容是能被反序化后能被判断为真的字符串的翻转，比如 ‘;1:b’ 。所以 auth 的内容为<code>&#39;b:1;&#39; + strrev( &#39;\x80&#39; + &#39;\x00&#39;*(51-x) + hex(x+4) ) + &#39;b:0;&#39; + SECRET</code>，根据之前得到的 hsh 值，枚举 x 计算长度扩展后的哈希值。</p>
+<h2 id="xor挑战-三个白帽"><a href="#xor挑战-三个白帽" class="headerlink" title="xor挑战 三个白帽"></a>xor挑战 <em>三个白帽</em></h2><figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div></pre></td><td class="code"><pre><div class="line"><span class="meta">&lt;?php</span></div><div class="line"><span class="keyword">include</span>(<span class="string">"config.php"</span>);</div><div class="line">header(<span class="string">"Content-type: text/html; charset=utf-8"</span>);</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">function</span> <span class="title">authcode</span><span class="params">($string, $operation = <span class="string">'DECODE'</span>, $key = <span class="string">''</span>, $expiry = <span class="number">0</span>)</span> </span>&#123;</div><div class="line"></div><div class="line">   $ckey_length = <span class="number">8</span>;</div><div class="line">   $key = md5($key ? $key : <span class="string">''</span>);</div><div class="line">   $keya = md5(substr($key, <span class="number">0</span>, <span class="number">16</span>));</div><div class="line">   $keyb = md5(substr($key, <span class="number">16</span>, <span class="number">16</span>));</div><div class="line">   $keyc = $ckey_length ? ($operation == <span class="string">'DECODE'</span> ? substr($string, <span class="number">0</span>, $ckey_length): substr(md5(microtime()), -$ckey_length)) : <span class="string">''</span>;</div><div class="line"></div><div class="line">   $cryptkey = hash(<span class="string">'sha256'</span>, $keya.md5($keya.$keyc));</div><div class="line"></div><div class="line">   $string = $operation == <span class="string">'DECODE'</span> ? base64_decode(substr($string, $ckey_length)) : sprintf(<span class="string">'%010d'</span>, $expiry ? $expiry + time() : <span class="number">0</span>).md5($keyb.$string).$string;</div><div class="line">   $string_length = strlen($string);</div><div class="line">   $result = <span class="string">''</span>;</div><div class="line">   <span class="keyword">for</span> ($i=<span class="number">0</span>; $i&lt;$string_length; $i++)&#123;</div><div class="line">       $result .= $string[$i] ^ $cryptkey[$i % <span class="number">64</span>];</div><div class="line">   &#125;</div><div class="line"></div><div class="line">   <span class="keyword">if</span>($operation == <span class="string">'DECODE'</span>) &#123;</div><div class="line">       <span class="keyword">if</span>((substr($result, <span class="number">0</span>, <span class="number">10</span>) == <span class="number">0</span> || substr($result, <span class="number">0</span>, <span class="number">10</span>) - time() &gt; <span class="number">0</span>) &amp;&amp; substr($result, <span class="number">10</span>, <span class="number">32</span>) == md5($keyb.substr($result, <span class="number">42</span>))) &#123;</div><div class="line">           <span class="keyword">return</span> substr($result, <span class="number">42</span>);</div><div class="line">       &#125; <span class="keyword">else</span> &#123;</div><div class="line">           <span class="keyword">return</span> <span class="string">''</span>;</div><div class="line">       &#125;</div><div class="line">   &#125; <span class="keyword">else</span> &#123;</div><div class="line">       <span class="keyword">return</span> $keyc.str_replace(<span class="string">'='</span>, <span class="string">''</span>, base64_encode($result));</div><div class="line">   &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">if</span> (<span class="keyword">isset</span>($_GET[<span class="string">'showSource'</span>]))&#123;</div><div class="line">   show_source(<span class="keyword">__FILE__</span>);</div><div class="line">   <span class="keyword">die</span>;</div><div class="line">&#125;</div><div class="line"></div><div class="line">session_start();</div><div class="line"></div><div class="line"><span class="keyword">if</span> ($_COOKIE[<span class="string">'auth'</span>])&#123;</div><div class="line">   <span class="keyword">list</span>($user, $password) = explode(<span class="string">"\t"</span>, authcode($_COOKIE[<span class="string">'auth'</span>], <span class="string">'DECODE'</span>, $secret_key));</div><div class="line">   <span class="keyword">if</span> ($user !=<span class="string">''</span> &amp;&amp; $password != <span class="string">''</span>)&#123;</div><div class="line">       $sql = <span class="string">"select uid, username, password from users where username='$user'"</span>;</div><div class="line">       $result = mysql_query($sql);</div><div class="line">       <span class="keyword">if</span> ($result)&#123;</div><div class="line">           $row = @mysql_fetch_array($result);</div><div class="line">           <span class="keyword">if</span> ($row[<span class="string">'password'</span>]===md5($password))&#123;</div><div class="line">               $_SESSION[<span class="string">'uid'</span>] = $row[<span class="string">'uid'</span>];</div><div class="line">               <span class="keyword">echo</span> <span class="string">"&lt;div style=\"text-align:left\"&gt;&lt;h4&gt;Welcome "</span>.$row[<span class="string">'username'</span>].<span class="string">". My lord!&lt;/h4&gt;&lt;/div&gt;&lt;br/&gt;"</span>;</div><div class="line">           &#125;</div><div class="line">       &#125;</div><div class="line">   &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">if</span> (!$_SESSION[<span class="string">'uid'</span>]) &#123;</div><div class="line">   <span class="keyword">echo</span> <span class="string">"&lt;div style=\"text-align:left\"&gt;&lt;h4&gt;Decrypt me!: "</span>.authcode(base64_encode($msg), <span class="string">'ENCODE'</span>, $secret_key).<span class="string">"&lt;/h4&gt;&lt;/div&gt;&lt;br/&gt;"</span>;</div><div class="line">&#125;<span class="keyword">else</span>&#123;</div><div class="line">   <span class="keyword">echo</span> $msg;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="meta">?&gt;</span></div><div class="line"></div><div class="line">&lt;!--&lt;a href=<span class="string">"/?showSource"</span>&gt;view source&lt;/a&gt;--&gt;</div></pre></td></tr></table></figure>
+<p>读懂代码之后难度不算大，主要的难点并不在与长度扩展攻击，而是破解异或加密。</p>
+<p>明文在经过 authcode 函数加密后，形式如下：</p>
+<ul>
+<li><code>cipher = keyc || base64( cryptkey ^ result )</code></li>
+<li><code>result = &#39;0000000000&#39; || md5( keyb || plain ) || plain</code></li>
+</ul>
+<p>其中 keyc 可视为一个随机公钥，明文进行加密时系统会随机选定并作为密文的前8字节给出， keyb 是私钥， cryptkey 是 keyc 和另一私钥 keya 哈希计算的结果，也可视为私钥。</p>
+<p>打开这个php首先看到 msg 的密文，可以从中恢复出 t = cryptkey ^ result 这一步的值， cryptkey 有64位，对 result 进行循环异或，注意到 result 的前10位是’0’，11-42位是 md5 值，也就是字符 0-f ，后面的全部是可打印字符。那么 cryptkey 的前10位可以直接解出，11-42位各有16种可能，后面各位各有64种可能，最后一位是等号的可能性非常大，由于是循环加密，并且 msg 是有意义的字符串，将 cryptkey 各位上的可能字符集求交集就能将它推出。</p>
+<p>求出 cryptkey 后，就得到了 md5( keyb || msg ) 和 msg ，然后构造一个 $_COOKIE[auth] 的密文进行注入，后面的步骤就比较简单了。由于 cryptkey 是用 keyc 和 keya 计算得到，不能构造，而 keya 在加解密中一直不变，所以构造的密文中的 keyc 仍然使用 msg 密文中的 keyc 。以 msg 为前缀构造注入语句 plain ，其中包含 ‘\t’ 字符可被分为 username 和 password 两部分，利用长度扩展攻击计算 md5( keyb || plain ) ，再依次计算 result 和 cipher ，放到 cookie 里，完成。</p>
+<h2 id="salt-强网杯-2015"><a href="#salt-强网杯-2015" class="headerlink" title="salt 强网杯 2015"></a>salt <em>强网杯 2015</em></h2><p>2015年强网杯的salt是我做的第一个长度扩展，当时还不知道这种攻击方法，还好经过虾米酱提醒，学习了一个新姿势。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> random, string, re, urlparse</div><div class="line"><span class="keyword">from</span> hashlib <span class="keyword">import</span> sha1</div><div class="line"><span class="keyword">import</span> SocketServer,threading,os</div><div class="line"></div><div class="line"><span class="keyword">try</span>:</div><div class="line">  <span class="keyword">from</span> flag <span class="keyword">import</span> FLAG</div><div class="line"><span class="keyword">except</span>:</div><div class="line">  FLAG = <span class="string">'flag&#123;test-flag&#125;'</span></div><div class="line"></div><div class="line">urlre = re.compile(<span class="string">'^/login\?username=.+&amp;password=.+$'</span>)</div><div class="line">passwordre = re.compile(<span class="string">'^[-_a-z0-9]&#123;6,20&#125;$'</span>, re.I)</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">ask</span><span class="params">(s, msg = <span class="string">''</span>)</span>:</span></div><div class="line">  <span class="keyword">if</span> msg:</div><div class="line">    s.send(msg)</div><div class="line">  <span class="keyword">try</span>:</div><div class="line">    <span class="keyword">return</span> s.recv(<span class="number">10</span>).lower()[<span class="number">0</span>] <span class="keyword">in</span> (<span class="string">'y'</span>, <span class="string">'\n'</span>)</div><div class="line">  <span class="keyword">except</span>:</div><div class="line">    <span class="keyword">return</span> <span class="keyword">False</span></div><div class="line"></div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">threadedserver</span><span class="params">(SocketServer.ThreadingMixIn, SocketServer.TCPServer)</span>:</span></div><div class="line">  <span class="keyword">pass</span></div><div class="line"></div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">incoming</span><span class="params">(SocketServer.BaseRequestHandler)</span>:</span></div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">handle</span><span class="params">(self)</span>:</span></div><div class="line">    cur_thread = threading.current_thread()</div><div class="line">    self.request.settimeout(<span class="number">120</span>)</div><div class="line">    self.request.send(<span class="string">'Here is a login system using sha1(salt + password) to protect your safety.\nHow many password/hash pair do you need to crack the salt?\n'</span>)</div><div class="line">    salt = <span class="string">''</span>.join([random.choice(string.printable[:<span class="number">62</span>]) <span class="keyword">for</span> x <span class="keyword">in</span> range(<span class="number">16</span>)])</div><div class="line"></div><div class="line">    seen = set()</div><div class="line"></div><div class="line">    <span class="keyword">while</span> <span class="keyword">True</span>:</div><div class="line">      <span class="keyword">if</span> <span class="keyword">not</span> ask(self.request, msg = <span class="string">"Register Account?[Y/n] "</span>):</div><div class="line">        <span class="keyword">break</span></div><div class="line"></div><div class="line">      self.request.send(<span class="string">"Your username: "</span>)</div><div class="line">      username = self.request.recv(<span class="number">1024</span>).strip()</div><div class="line"></div><div class="line">      <span class="keyword">if</span> <span class="keyword">not</span> username <span class="keyword">or</span> username == <span class="string">'admin'</span>:</div><div class="line">        self.request.send(<span class="string">'invalid username'</span>)</div><div class="line">        <span class="keyword">return</span></div><div class="line"></div><div class="line">      self.request.send(<span class="string">"Your password: "</span>)</div><div class="line">      password = self.request.recv(<span class="number">1024</span>).strip()</div><div class="line"></div><div class="line">      <span class="keyword">if</span> <span class="keyword">not</span> password:</div><div class="line">        self.request.send(<span class="string">'invalid password'</span>)</div><div class="line">        <span class="keyword">return</span></div><div class="line"></div><div class="line">      url = <span class="string">'/login?username='</span> + username + <span class="string">'&amp;password='</span> + password</div><div class="line"></div><div class="line">      <span class="keyword">if</span> url <span class="keyword">in</span> seen:</div><div class="line">        self.request.send(<span class="string">'duplicate password\n'</span>)</div><div class="line">        <span class="keyword">return</span></div><div class="line"></div><div class="line">      seen.add(url)</div><div class="line"></div><div class="line">      sr = sha1(salt + url)</div><div class="line">      srx = [x <span class="keyword">for</span> x <span class="keyword">in</span> sr.hexdigest()]</div><div class="line"></div><div class="line">      rans = set()</div><div class="line"></div><div class="line">      <span class="keyword">while</span> len(rans) &lt; <span class="number">7</span>:</div><div class="line">        rans.add(random.randint(<span class="number">0</span>, len(srx)<span class="number">-1</span>))</div><div class="line"></div><div class="line">      <span class="keyword">for</span> i <span class="keyword">in</span> rans:</div><div class="line">        srx[i] = <span class="string">'x'</span></div><div class="line"></div><div class="line">      self.request.send(<span class="string">'%s\n'</span> % <span class="string">''</span>.join(srx))</div><div class="line"></div><div class="line">    r = random.randint(<span class="number">0</span>, <span class="number">1</span>)</div><div class="line">    correct = <span class="keyword">False</span></div><div class="line">    <span class="keyword">if</span> r == <span class="number">0</span>:</div><div class="line">      self.request.send(<span class="string">'Question1: Tell me the salt: '</span>)</div><div class="line">      <span class="keyword">if</span> self.request.recv(<span class="number">1024</span>) == salt:</div><div class="line">        correct = <span class="keyword">True</span></div><div class="line">    <span class="keyword">elif</span> r == <span class="number">1</span>:</div><div class="line">      self.request.send(<span class="string">'Question2: Now try to cheat the login system.\nSend login url: '</span>)</div><div class="line">      url = self.request.recv(<span class="number">1024</span>)</div><div class="line">      <span class="keyword">if</span> <span class="keyword">not</span> url: <span class="keyword">return</span></div><div class="line">      self.request.send(<span class="string">'Signature: '</span>)</div><div class="line">      sig = self.request.recv(<span class="number">1024</span>).strip()</div><div class="line">      <span class="keyword">if</span> <span class="keyword">not</span> sig: <span class="keyword">return</span></div><div class="line">      urlparsed = urlparse.urlparse(url)</div><div class="line">      account = dict((k, v) <span class="keyword">for</span> k, v <span class="keyword">in</span> urlparse.parse_qsl(urlparsed.query))</div><div class="line">      self.request.send(str(len(url)) + <span class="string">'\n'</span> + sha1(salt + url).hexdigest() + <span class="string">'\n'</span> + sig + <span class="string">'\n'</span>)</div><div class="line">      <span class="keyword">if</span> urlre.match(url) <span class="keyword">and</span> account.get(<span class="string">'username'</span>) == <span class="string">'admin'</span> <span class="keyword">and</span> passwordre.match(account.get(<span class="string">'password'</span>, <span class="string">''</span>)) \</div><div class="line">        <span class="keyword">and</span> len(account) == <span class="number">2</span> <span class="keyword">and</span> urlparsed.path == <span class="string">'/login'</span> <span class="keyword">and</span> sig == sha1(salt + url).hexdigest():</div><div class="line">          correct = <span class="keyword">True</span></div><div class="line">    <span class="keyword">if</span> correct:</div><div class="line">      self.request.send(<span class="string">'Congratulations, flag is %s\n'</span> % FLAG)</div><div class="line">    <span class="keyword">else</span>:</div><div class="line">      self.request.send(<span class="string">'Incorrect answer, bye\n'</span>)</div><div class="line"></div><div class="line">SocketServer.TCPServer.allow_reuse_address = <span class="keyword">True</span></div><div class="line">server = threadedserver((<span class="string">"0.0.0.0"</span>, <span class="number">4444</span>), incoming)</div><div class="line">server.timeout = <span class="number">120</span></div><div class="line">server_thread = threading.Thread(target=server.serve_forever)</div><div class="line">server_thread.daemon = <span class="keyword">False</span></div><div class="line">server_thread.start()</div></pre></td></tr></table></figure>
+<p>简单解释题意：</p>
+<ul>
+<li>可以注册多个账号，用户名不能是 admin</li>
+<li>服务器每次将检查通过的用户名密码拼接成一个url：<code>/login?username=x&amp;password=y</code></li>
+<li>服务器将16字节密钥 salt 与 url 拼接后用 <strong>sha1</strong> 进行签名，以十六进制形式发给用户，<code>Signature = sha1( salt || url ).hexdigest()</code> ，随机隐去其中7位</li>
+<li>用户选择一种方式进行hack：<ul>
+<li>提交salt</li>
+<li>提交一对匹配的 url 和签名，从url中提取的 username 是 admin</li>
+</ul>
+</li>
+</ul>
+<p>这个题salt肯定是算不出来的，整体思路是通过长度扩展攻击算出被隐去部分内容的签名值。有用的签名值需要满足两点： username 是 admin ，并且可以用来进行长度扩展。</p>
+<p>对于url的限制有两点：</p>
+<ul>
+<li>正则满则<code>^/login\?username=.+&amp;password=.+$</code></li>
+<li>通过 urlparse 进行解析所得到的字典长度为2， username 为 admin</li>
+</ul>
+<p>在注册的时候 username 写<code>admin&amp;username=admin</code>或其它类似的方法就能绕过这个验证，获得一个有用的签名，下一步就是进行长度扩展攻击来确定签名中被隐去的字符。</p>
+<p>在服务器上注册两次，服务器生成的 url 分别为 url1 和 url2 ，并使 url1 是 url2 的前缀，若知道<code>sig1 = sha1( salt || url1 )</code>，就可以用长度扩展攻击得到<code>sig2 = sha1( salt || url2 )</code>的值。所以枚举sig1中的未知字符进行扩展，经计算所得与sig2比对，比对成功则得到了两个有用的签名值。</p>
+<p>这个方法复杂度为$16 ^ 7 * O(sha1)$，当时我是拿到两个签名之后调用一个修改的C代码来算，如果用python不知道能不能在120秒内算出来。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/HASH/" rel="tag"># HASH</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/12/02/hello-world/" rel="next" title="Hello World">
+                <i class="fa fa-chevron-left"></i> Hello World
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.jpg"
+               alt="danlei" />
+          <p class="site-author-name" itemprop="name">danlei</p>
+          <p class="site-description motion-element" itemprop="description"></p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">2</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">2</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">1</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+          <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+            <div class="links-of-blogroll-title">
+              <i class="fa  fa-fw fa-globe"></i>
+              友链
+            </div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="https://www.brickgao.com/" title="Brickgao" target="_blank">Brickgao</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="https://merlinhool.github.io/" title="Plumrain" target="_blank">Plumrain</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="https://hxer.github.io/" title="Janes" target="_blank">Janes</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://whuctf.org/" title="Haloes" target="_blank">Haloes</a>
+                </li>
+              
+            </ul>
+          </div>
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#应用"><span class="nav-number">1.</span> <span class="nav-text">应用</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#原理"><span class="nav-number">2.</span> <span class="nav-text">原理</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#实例"><span class="nav-number">3.</span> <span class="nav-text">实例</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#mtpox-PlaidCTF-2014"><span class="nav-number">3.1.</span> <span class="nav-text">mtpox PlaidCTF 2014</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#xor挑战-三个白帽"><span class="nav-number">3.2.</span> <span class="nav-text">xor挑战 三个白帽</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#salt-强网杯-2015"><span class="nav-number">3.3.</span> <span class="nav-text">salt 强网杯 2015</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">danlei</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+
+  
+
+    <script type="text/javascript">
+      var disqus_shortname = 'danaive-github-io';
+      var disqus_identifier = '2016/12/06/0x01/';
+
+      var disqus_title = "哈希长度扩展攻击总结";
+
+
+      function run_disqus_script(disqus_script) {
+        var dsq = document.createElement('script');
+        dsq.type = 'text/javascript';
+        dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+      }
+
+      run_disqus_script('count.js');
+
+      
+        var disqus_config = function () {
+            this.page.url = disqus_url;
+            this.page.identifier = disqus_identifier;
+            this.page.title = disqus_title;
+        };
+        run_disqus_script('embed.js');
+      
+
+    </script>
+  
+
+
+
+
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+  
+
+
+</body>
+</html>
