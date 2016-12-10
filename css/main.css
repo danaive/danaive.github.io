@@ -277,14 +277,14 @@ p {
   margin: 0 0 25px 0;
 }
 a {
-  color: #555;
+  color: #4d8fac;
   text-decoration: none;
   border-bottom: 1px solid #999;
   word-wrap: break-word;
 }
 a:hover {
-  color: #222;
-  border-bottom-color: #222;
+  color: #3bafda;
+  border-bottom-color: #3bafda;
 }
 ul {
   list-style: none;
@@ -836,8 +836,8 @@ pre .javascript .function {
   padding: 0 20px;
   font-size: 14px;
   color: #fff;
-  background: #222;
-  border: 2px solid #555;
+  background: #0684bd;
+  border: 2px solid #0684bd;
   text-decoration: none;
   border-radius: 0;
   transition-property: background-color;
@@ -847,9 +847,9 @@ pre .javascript .function {
 }
 .btn:hover,
 .post-more-link .btn:hover {
-  border-color: #222;
-  color: #fff;
-  background: #222;
+  border-color: #3bafda;
+  color: #3bafda;
+  background: #fff;
 }
 .btn-bar {
   display: block;
@@ -1461,11 +1461,11 @@ pre .javascript .function {
   display: block;
   line-height: 25px;
   font-size: 14px;
-  color: #555;
+  color: #4d8fac;
   border-bottom: none;
 }
 .post-nav-item a:hover {
-  color: #222;
+  color: #3bafda;
   border-bottom: none;
 }
 .post-nav-item a:active {
@@ -1682,7 +1682,7 @@ pre .javascript .function {
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: #d7384e;
+  background: #c49a86;
 }
 .links-of-blogroll {
   font-size: 13px;
@@ -2869,6 +2869,9 @@ a:hover {
 .nav-number {
   display: none;
 }
+.post-nav-item a {
+  color: #4d8fac;
+}
 code {
   color: inherit;
   background-color: #ddd;
@@ -2882,4 +2885,9 @@ code {
 }
 h1 {
   margin: 15px 0px;
+}
+.post-more-link .btn {
+  border: none;
+  border-bottom: 2px solid #4d8fac;
+  color: #4d8fac;
 }
