@@ -90,10 +90,12 @@
 <meta property="og:url" content="https://danaive.github.io/2016/12/06/0x01/index.html">
 <meta property="og:site_name" content="NaiveBlue">
 <meta property="og:description" content="哈希长度扩展攻击（Hash Length Extension Attacks）是一种常见的密码分析方法，在消息验证码（MAC）中应用很广，WEB类题目中也有出现，应队里WEB手要求，第一篇博客就先写这个吧。">
-<meta property="og:updated_time" content="2016-12-10T03:31:21.000Z">
+<meta property="og:image" content="http://oi3q0gkjy.bkt.clouddn.com/hash3.png?watermark/2/text/QGRhbmxlaQ==/font/5b6u6L2v6ZuF6buR/fontsize/500/fill/IzlFOUQ5RA==/dissolve/100/gravity/South/dy/10 =500">
+<meta property="og:updated_time" content="2016-12-13T02:37:20.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="哈希长度扩展攻击总结">
 <meta name="twitter:description" content="哈希长度扩展攻击（Hash Length Extension Attacks）是一种常见的密码分析方法，在消息验证码（MAC）中应用很广，WEB类题目中也有出现，应队里WEB手要求，第一篇博客就先写这个吧。">
+<meta name="twitter:image" content="http://oi3q0gkjy.bkt.clouddn.com/hash3.png?watermark/2/text/QGRhbmxlaQ==/font/5b6u6L2v6ZuF6buR/fontsize/500/fill/IzlFOUQ5RA==/dissolve/100/gravity/South/dy/10 =500">
 
 
 
@@ -359,6 +361,7 @@
         <p>哈希长度扩展攻击（Hash Length Extension Attacks）是一种常见的密码分析方法，在消息验证码（MAC）中应用很广，WEB类题目中也有出现，应队里WEB手要求，第一篇博客就先写这个吧。<br><a id="more"></a></p>
 <h1 id="应用"><a href="#应用" class="headerlink" title="应用"></a>应用</h1><p>在基于 <em>Merkle–Damgård</em> 架构的哈希算法中，如果攻击者掌握了 $Hash(message)$ 的值以及 $message$ 的长度，那么在不知道 $message$ 的情况下，可以获取 $Hash( message\ ||\ padding\ ||\ message’ )$ 的值，其中 $message’$ 为任意值，$padding$ 通过 $message$ 长度计算决定。md5/sha1/sha256 算法可被攻击，<em>sha224</em> 虽然基于<em>Merkle–Damgård</em>架构，但不受影响，<em>sha3</em> 族算法不基于 <em>Merkle–Damgård</em> 架构。</p>
 <h1 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h1><p><em>Merkle–Damgård</em> 架构如下图所示。</p>
+<p><img src="http://oi3q0gkjy.bkt.clouddn.com/hash3.png?watermark/2/text/QGRhbmxlaQ==/font/5b6u6L2v6ZuF6buR/fontsize/500/fill/IzlFOUQ5RA==/dissolve/100/gravity/South/dy/10 =500" alt=""></p>
 <p>其中 $IV$ 表示初始向量，$f$ 为压缩函数，$M$ 为明文分块输入，$L$ 为块数，$CV$ 为链接向量。明文每512位为一块，最后的短块依次填充1位1和若干位0（按字节表示为\x80\x00\x00\x00…）直到最后一块中有448位（若短块不小于448位则新加一块，并填充至新块的448位），在剩下的64位中填上有效字节数，最高有效位在前。完整明文块和填充后的短块均为512位，和前一轮的链接向量（首轮则为初始向量）共同作为压缩函数的输入计算出本轮的链接向量。用 $T$ 表示链接向量的拼接操作</p>
 <ul>
 <li>$Hash(message) = T(CV_L)$。</li>
