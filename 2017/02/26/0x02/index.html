@@ -90,7 +90,7 @@
 <meta property="og:url" content="https://danaive.github.io/2017/02/26/0x02/index.html">
 <meta property="og:site_name" content="NaiveBlue">
 <meta property="og:description" content="Gradient Boosting 是一种把较弱的基学习器进行集成来产生较强的学习器的算法，它可以使用任意的可微损失函数作为模型的损失函数。算法思想基于 Boosting 可以被视为是在一个合适的代价函数上的最优化问题。">
-<meta property="og:updated_time" content="2017-02-26T14:10:57.000Z">
+<meta property="og:updated_time" content="2017-02-26T14:13:14.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Gradient Boosting 学习笔记">
 <meta name="twitter:description" content="Gradient Boosting 是一种把较弱的基学习器进行集成来产生较强的学习器的算法，它可以使用任意的可微损失函数作为模型的损失函数。算法思想基于 Boosting 可以被视为是在一个合适的代价函数上的最优化问题。">
@@ -376,7 +376,7 @@
 <ul>
 <li>$ r_{m,i} = - \frac{\partial L(y_i,\ F^{m-1}\,\,(x_i))}{\partial F^{m-1}\,\,(x_i)} $</li>
 </ul>
-<p>使用 $(\bf{x},\, \bf{r_m})$ 训练新的学习器 $h_m(x)$，通过 Line Search 寻找这个即基学习器的权重因子 $\gamma_m$，并计算 $F^m$：</p>
+<p>使用 $(\bf{x},\, \bf{r_m})$ 训练新的学习器 $h_m$，通过 Line Search 寻找这个即基学习器的权重因子 $\gamma_m$，并计算 $F^m$：</p>
 <ul>
 <li>$ \gamma_m = \underset{\gamma}{\arg\min} \sum\limits_i L(y_i,\ F^{m-1}(x_i) + \gamma h_m(x_i)) $</li>
 <li>$ F^m(x) = F^{m-1}(x) + \gamma_m h_m(x) $</li>
